@@ -1,0 +1,4 @@
+(library
+ (name epub)
+ (public_name epub-ml)
+ (libraries xmlm zipc))

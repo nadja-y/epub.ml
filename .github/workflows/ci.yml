@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
+      - run: nix build
+      - if: github.ref == 'refs/heads/trunk'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: result
+      - if: github.ref == 'refs/heads/trunk'
+        run: |
+          tar -cf site.tar -C result .
+          gh release delete latest --yes || true
+          gh release create latest site.tar --title "epub.ml" --notes "$(git rev-parse HEAD)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  deploy:
+    if: github.ref == 'refs/heads/trunk'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v5
