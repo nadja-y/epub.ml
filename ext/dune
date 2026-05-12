@@ -1,0 +1,8 @@
+(executable
+ (name viewer)
+ (modes js)
+ (libraries epub brr)
+ (preprocess (pps js_of_ocaml-ppx))
+ (js_of_ocaml
+  (compilation_mode whole_program)
+  (flags (:standard --opt 3 --target-env browser))))
